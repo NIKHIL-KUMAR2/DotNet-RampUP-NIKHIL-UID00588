@@ -39,7 +39,7 @@ namespace restaurant_nikhil
                 }
                 else
                 {
-                    Response.Redirect("ErrorPage.aspx?error=No restaurant found");
+                    Response.Redirect("ErrorPage.aspx?error=No restaurant found. Invalid Restaurant Id");
                 }
 
             }
@@ -71,7 +71,7 @@ namespace restaurant_nikhil
                 DataTable dt = FetchAllOrdersFromDB(userId,resId, sortQuery, searchQuery, filterQuery);
                 if (dt.Rows.Count > 0)
                 {
-                    
+                    OrdersGrid.Visible = true;
                     ViewState["OrdersData"] = dt;
                     OrdersGrid.DataSource = dt;
                     OrdersGrid.DataBind();
@@ -148,16 +148,25 @@ namespace restaurant_nikhil
         {
 
             int searchOrderId = 0;
-            if (int.TryParse(searchQuery, out int x))
-            {
-                searchOrderId = x;
-            }
+            //if (int.TryParse(searchQuery, out int x))
+            //{
+            //    searchOrderId = x;
+            //}
 
             string query = "SELECT AO.id, AO.status, AO.orderValue, AO.createdAt,AO.updatedAt, CONCAT(AU.firstName,' ', AU.lastName) AS customerName FROM AppOrder AO LEFT JOIN AppUser AU on AO.userId = AU.id LEFT JOIN restaurant R on AO.restaurantId= R.id WHERE restaurantId = @resId and R.userId = @CurrentUser ";
 
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                query += "and (AU.firstName LIKE @Search or AU.lastName LIKE @Search or AO.id = @SearchById) ";
+                if(int.TryParse(searchQuery,out int x))
+                {
+                    searchOrderId = x;
+                    query += "and AO.id = @SearchById ";
+                }
+                else
+                {
+                    query += "and (AU.firstName LIKE @Search or AU.lastName LIKE @Search) ";
+                }
+                    
             }
             if (!string.IsNullOrEmpty(filterQuery))
             {
@@ -169,7 +178,7 @@ namespace restaurant_nikhil
 
 
 
-            Debug.WriteLine(query + searchQuery + " " + filterQuery + " " + sortQuery+" resid "+resId+" userid : "+userId);
+            
             
             string connStr = ConfigurationManager.ConnectionStrings["MyDbConnection"].ConnectionString;
 
@@ -177,8 +186,6 @@ namespace restaurant_nikhil
             {
                 try
                 {
-                    
-                    
 
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.Add("@resId", SqlDbType.Int).Value=resId;
@@ -186,8 +193,16 @@ namespace restaurant_nikhil
 
                     if (!string.IsNullOrEmpty(searchQuery))
                     {
-                        cmd.Parameters.Add("@Search", SqlDbType.VarChar, 100).Value = "%" + searchQuery + "%";
-                        cmd.Parameters.Add("@SearchById", SqlDbType.Int).Value = searchOrderId;
+                        if (searchOrderId != 0)
+                        {
+                            cmd.Parameters.Add("@SearchById", SqlDbType.Int).Value = searchOrderId;
+                        }
+                        else
+                        {
+                            cmd.Parameters.Add("@Search", SqlDbType.VarChar, 100).Value = "%" + searchQuery + "%";
+                        }
+                            
+                        
 
                     }
                     if (!string.IsNullOrEmpty(filterQuery))
@@ -197,7 +212,7 @@ namespace restaurant_nikhil
 
 
 
-                    conn.Open();
+                    
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -358,6 +373,13 @@ namespace restaurant_nikhil
                 // value of new status that need to be updated in order
                 DropDownList ddl = (DropDownList)row.FindControl("StatusUpdateDDL");
                 string newStatus = ddl.SelectedValue;
+                string currentStatus = row.Cells[5].Text;
+                if (newStatus == currentStatus)
+                {
+                    ErrorLabelOrders.Text = "Please change the status before hiting update at OrderId #"+orderId;
+                    return;
+                }
+
 
 
 

@@ -16,8 +16,10 @@ namespace restaurant_nikhil.Services
 
         public LoginService()
         {
-            //_connectionString = ConfigurationManager.ConnectionStrings["MyDbConnection"].ConnectionString;
-            _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=restaurant;Integrated Security=True;TrustServerCertificate=True";
+            _connectionString = ConfigurationManager.ConnectionStrings["MyDbConnection"].ConnectionString;
+
+            //for testcases only-->
+            //_connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=restaurant;Integrated Security=True;TrustServerCertificate=True";
         }
         public LoginResult AuthenticateUser(string email,string password)
         {

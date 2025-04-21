@@ -106,12 +106,13 @@
                     <asp:ListItem Text="Delivered" Value="delivered"></asp:ListItem>
                     <asp:ListItem Text="Cancelled" Value="cancelled"></asp:ListItem>
                 </asp:DropDownList>
+                
                 <asp:Button ID="FilterByStatusBTN" CssClass="action-btn" runat="server" OnClick="FilterOrdersByStatusBTN_CLICK" Text="Apply Filter" />
                 <asp:Button ID="ClearFilterBTN" runat="server" CssClass="action-btn" OnClick="ClearFilterBTN_CLICK" Text="Clear Filter" />
             </div>
             <asp:Label ID="FilterInfoLabel" runat="server"></asp:Label>
             <asp:GridView ID="OrdersGrid" runat="server"
-                EnableViewState="true"
+                
                 AllowSorting="True"
                 OnSorting="OrdersGrid_Sorting"
                 OnRowCommand="OrdersGrid_RowCommand"
