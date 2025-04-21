@@ -23,7 +23,7 @@ namespace restaurant_nikhil
             {
                 Response.Redirect("Login.aspx");
             }
-            
+
 
 
             if (!IsPostBack)
@@ -49,8 +49,9 @@ namespace restaurant_nikhil
         {
             string rId = Request.QueryString["resId"];
             string uId = Session["userId"].ToString();
-            int resId=0, userId=0;
-            if(int.TryParse(rId,out int x) && int.TryParse(uId,out int y)){
+            int resId = 0, userId = 0;
+            if (int.TryParse(rId, out int x) && int.TryParse(uId, out int y))
+            {
                 resId = x;
                 userId = y;
             }
@@ -58,7 +59,7 @@ namespace restaurant_nikhil
             {
                 Response.Redirect("ErrorPage.aspx?error=No restaurant found");
             }
-            
+
             string filterQuery = ViewState["FilterQuery"] != null ? ViewState["FilterQuery"].ToString() : "";
             string searchQuery = ViewState["SearchQuery"] != null ? ViewState["SearchQuery"].ToString() : "";
 
@@ -67,8 +68,8 @@ namespace restaurant_nikhil
             string sortQuery = CreateSortQuery();
             try
             {
-                
-                DataTable dt = FetchAllOrdersFromDB(userId,resId, sortQuery, searchQuery, filterQuery);
+
+                DataTable dt = FetchAllOrdersFromDB(userId, resId, sortQuery, searchQuery, filterQuery);
                 if (dt.Rows.Count > 0)
                 {
                     OrdersGrid.Visible = true;
@@ -83,7 +84,7 @@ namespace restaurant_nikhil
                     ErrorLabelOrders.ForeColor = System.Drawing.Color.Red;
                     if (!IsPostBack)
                     {
-                        OrdersForm.Visible=false;
+                        OrdersForm.Visible = false;
                         Response.Write("No Orders found");
 
                     }
@@ -92,7 +93,7 @@ namespace restaurant_nikhil
                         ErrorLabelOrders.Text = "No orders match your search or filter please update your search or filter";
                         OrdersGrid.Visible = false;
                     }
-                    
+
                 }
 
             }
@@ -143,8 +144,8 @@ namespace restaurant_nikhil
 
         //method to fetch all orders from database based on filter, search and sort expression if provided
         //method takes arguments so that it can be tested without ui
-        
-        public DataTable FetchAllOrdersFromDB(int userId,int resId, string sortQuery, string searchQuery = "", string filterQuery = "")
+
+        public DataTable FetchAllOrdersFromDB(int userId, int resId, string sortQuery, string searchQuery = "", string filterQuery = "")
         {
 
             int searchOrderId = 0;
@@ -157,7 +158,7 @@ namespace restaurant_nikhil
 
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                if(int.TryParse(searchQuery,out int x))
+                if (int.TryParse(searchQuery, out int x))
                 {
                     searchOrderId = x;
                     query += "and AO.id = @SearchById ";
@@ -166,11 +167,19 @@ namespace restaurant_nikhil
                 {
                     query += "and (AU.firstName LIKE @Search or AU.lastName LIKE @Search) ";
                 }
-                    
+
             }
             if (!string.IsNullOrEmpty(filterQuery))
             {
                 query += "and AO.status = @Filter ";
+            }
+            string formattedDate = "";
+          
+            if (DateTime.TryParse(DateTextBox.Text, out DateTime selectedDate))
+            {
+                formattedDate = selectedDate.ToString("yyyy-MM-dd"); 
+                query += "and AO.createdAt >= @FilterByDate ";
+                
             }
 
 
@@ -178,8 +187,8 @@ namespace restaurant_nikhil
 
 
 
-            
-            
+
+
             string connStr = ConfigurationManager.ConnectionStrings["MyDbConnection"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connStr))
@@ -188,7 +197,7 @@ namespace restaurant_nikhil
                 {
 
                     SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.Add("@resId", SqlDbType.Int).Value=resId;
+                    cmd.Parameters.Add("@resId", SqlDbType.Int).Value = resId;
                     cmd.Parameters.Add("@CurrentUser", SqlDbType.Int).Value = userId;
 
                     if (!string.IsNullOrEmpty(searchQuery))
@@ -201,18 +210,23 @@ namespace restaurant_nikhil
                         {
                             cmd.Parameters.Add("@Search", SqlDbType.VarChar, 100).Value = "%" + searchQuery + "%";
                         }
-                            
-                        
+
+
 
                     }
                     if (!string.IsNullOrEmpty(filterQuery))
                     {
                         cmd.Parameters.Add("@Filter", SqlDbType.VarChar, 100).Value = filterQuery;
                     }
+                    if (query.Contains("@FilterByDate"))
+                    {
+                        Debug.WriteLine(formattedDate);
+                        cmd.Parameters.Add("@FilterByDate", SqlDbType.DateTime).Value = formattedDate;
+                    }
 
 
 
-                    
+
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -301,12 +315,12 @@ namespace restaurant_nikhil
                 GetOrders();
             }
 
-                
+
         }
 
         protected void FilterOrdersByStatusBTN_CLICK(object sender, EventArgs e)
         {
-            string filterValue= FilterStatusDDL.SelectedValue;
+            string filterValue = FilterStatusDDL.SelectedValue;
             if (IsValidFilter(filterValue))
             {
                 ViewState["FilterQuery"] = filterValue;
@@ -318,15 +332,15 @@ namespace restaurant_nikhil
             {
                 Response.Redirect("ErrorPage.aspx?error=Invalid Filter Applied");
             }
-            
-                
 
-            
+
+
+
         }
 
         private bool IsValidFilter(string filterValue)
         {
-            HashSet<string> validFilterValues = new HashSet<string> { 
+            HashSet<string> validFilterValues = new HashSet<string> {
             "pending",
             "confirmed",
             "prepared",
@@ -341,7 +355,7 @@ namespace restaurant_nikhil
             ViewState["SearchQuery"] = null;
             ViewState["FilterQuery"] = null;
             ViewState["SortExpression"] = null;
-
+            DateTextBox.Text = "";
             SearchTB.Text = "";
             FilterInfoLabel.Text = "";
             FilterStatusDDL.SelectedValue = "pending";
@@ -376,7 +390,7 @@ namespace restaurant_nikhil
                 string currentStatus = row.Cells[5].Text;
                 if (newStatus == currentStatus)
                 {
-                    ErrorLabelOrders.Text = "Please change the status before hiting update at OrderId #"+orderId;
+                    ErrorLabelOrders.Text = "Please change the status before hiting update at OrderId #" + orderId;
                     return;
                 }
 

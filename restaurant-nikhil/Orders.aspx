@@ -99,6 +99,7 @@
             <asp:Button ID="SearchBTN" CssClass="action-btn" runat="server" Text="Search" OnClick="SearchOrdersBTN_CLICK" />
 
             <div>
+                <asp:Label ID="Label2" runat="server" Text="Status : "></asp:Label>
                 <asp:DropDownList ID="FilterStatusDDL" runat="server" CssClass="dropdown-style">
                     <asp:ListItem Text="Pending" Value="pending"></asp:ListItem>
                     <asp:ListItem Text="Confirmed" Value="confirmed"></asp:ListItem>
@@ -106,10 +107,12 @@
                     <asp:ListItem Text="Delivered" Value="delivered"></asp:ListItem>
                     <asp:ListItem Text="Cancelled" Value="cancelled"></asp:ListItem>
                 </asp:DropDownList>
+                <asp:Label ID="Label1" runat="server" Text="On or after date : "></asp:Label>
                 <asp:TextBox ID="DateTextBox" runat="server" TextMode="Date" />
                 <asp:Button ID="FilterByStatusBTN" CssClass="action-btn" runat="server" OnClick="FilterOrdersByStatusBTN_CLICK" Text="Apply Filter" />
-                <asp:Button ID="ClearFilterBTN" runat="server" CssClass="action-btn" OnClick="ClearFilterBTN_CLICK" Text="Clear Filter" />
+                <asp:Button ID="ClearFilterBTN" runat="server" CssClass="action-btn" OnClick="ClearFilterBTN_CLICK" Text="Clear Filter and search" />
             </div>
+            
             <asp:Label ID="FilterInfoLabel" runat="server"></asp:Label>
             <asp:GridView ID="OrdersGrid" runat="server"
                 
