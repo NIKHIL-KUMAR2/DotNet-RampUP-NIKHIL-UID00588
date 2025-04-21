@@ -309,8 +309,7 @@ namespace restaurant_nikhil
             }
             else
             {
-                //cleaning search query to take only alphanumeric value from user
-                //string cleanedQuery = Regex.Replace(SearchTB.Text, "[^a-zA-Z0-9]", "");
+                
                 ViewState["SearchQuery"] = SearchTB.Text;
                 GetOrders();
             }
